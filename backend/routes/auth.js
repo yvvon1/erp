@@ -26,24 +26,10 @@ router.post("/login", async (req, res) => {
     res.json({
       직원ID: user.직원ID,
       이름: user.이름,
+      이메일: user.이메일,
       직무: user.직무,
       부서: user.부서,
     });
-  } catch (err) {
-    res.status(500).json({ message: "서버 오류", error: err.message });
-  }
-});
-
-// POST /api/auth/register - 직원 등록 시 비밀번호 해시화
-router.post("/register", async (req, res) => {
-  const { 직원ID, 이름, 이메일, 비밀번호, 직무, 부서 } = req.body;
-  try {
-    const hash = await bcrypt.hash(비밀번호, 10);
-    await db.query(
-      'INSERT INTO 직원 (직원ID, 이름, 이메일, 비밀번호, 직무, 부서, 재직여부) VALUES (?, ?, ?, ?, ?, ?, "ACTIVE")',
-      [직원ID, 이름, 이메일, hash, 직무, 부서],
-    );
-    res.status(201).json({ message: "직원 등록 완료" });
   } catch (err) {
     res.status(500).json({ message: "서버 오류", error: err.message });
   }
