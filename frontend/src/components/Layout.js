@@ -26,15 +26,9 @@ export default function Layout({ children, active }) {
     if (idx < 0 || !btnRefs.current[idx]) return;
     const el = btnRefs.current[idx];
     const rect = el.getBoundingClientRect();
-    const parentRect = el.parentElement.getBoundingClientRect();
-    const next = {
-      left: rect.left - parentRect.left,
-      width: rect.width,
-    };
-    setPill(next);
-    if (isFirst) {
-      setIsFirst(false);
-    }
+    const parent = el.parentElement.getBoundingClientRect();
+    setPill({ left: rect.left - parent.left, width: rect.width });
+    if (isFirst) setIsFirst(false);
   }, [active]);
 
   const handleLogout = () => {
@@ -43,9 +37,16 @@ export default function Layout({ children, active }) {
   };
 
   return (
+    /*
+     * glass-shell : height:100%  (glass.css에서 처리)
+     * glass-app   : height:100% + flex column (glass.css에서 처리)
+     * app-topbar  : flex-shrink:0  (glass.css에서 처리)
+     * .main       : flex:1 + minHeight:0 + overflowY:auto  (glass.css에서 처리)
+     */
     <div className="glass-shell">
       <div className="glass-app">
         <header className="app-topbar">
+          {/* 브랜드 */}
           <button
             className="brand"
             onClick={() =>
@@ -65,7 +66,7 @@ export default function Layout({ children, active }) {
             <span className="brand-name">Project Management System</span>
           </button>
 
-          {/* 네비 */}
+          {/* 슬라이딩 네비 */}
           <nav
             aria-label="주요 메뉴"
             style={{
@@ -77,10 +78,8 @@ export default function Layout({ children, active }) {
               borderRadius: "999px",
               background: "rgba(255,255,255,0.78)",
               boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
-              gap: "0",
             }}
           >
-            {/* 슬라이딩 pill */}
             {pill && (
               <span
                 aria-hidden="true"
@@ -100,7 +99,6 @@ export default function Layout({ children, active }) {
                 }}
               />
             )}
-
             {menus.map((item, idx) => (
               <button
                 key={item.label}
@@ -134,6 +132,7 @@ export default function Layout({ children, active }) {
             ))}
           </nav>
 
+          {/* 우측 */}
           <div className="top-actions">
             <button className="icon-button" type="button" title="알림">
               ♧
@@ -156,6 +155,7 @@ export default function Layout({ children, active }) {
           </div>
         </header>
 
+        {/* .main : glass.css에서 flex:1 + overflow:auto 처리 */}
         <main className="main">{children}</main>
       </div>
     </div>

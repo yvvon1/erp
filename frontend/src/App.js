@@ -27,15 +27,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
-        {/* PM — 탭 전환은 Shell 안에서 처리 */}
-        <Route
-          path="/pm/*"
-          element={
-            <PMRoute>
-              <PMShell />
-            </PMRoute>
-          }
-        />
+
+        {/* PM — 구체적인 경로 먼저 */}
         <Route
           path="/pm/projects/:id"
           element={
@@ -60,6 +53,17 @@ export default function App() {
             </PMRoute>
           }
         />
+
+        {/* PM Shell — 탭 전환 (대시보드/파이프라인/프로젝트목록/클라이언트/직원) */}
+        <Route
+          path="/pm/*"
+          element={
+            <PMRoute>
+              <PMShell />
+            </PMRoute>
+          }
+        />
+
         {/* 팀원 */}
         <Route
           path="/member/dashboard"
@@ -77,6 +81,7 @@ export default function App() {
             </MemberRoute>
           }
         />
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

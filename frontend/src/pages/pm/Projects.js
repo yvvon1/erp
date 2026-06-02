@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProjects, createProject } from "../../api/projects";
 import { getClients } from "../../api/clients";
-import { formatDate, statusLabel, typeLabel } from "../../utils/format";
+import { formatDate } from "../../utils/format";
 
 const glass = {
   background: "rgba(255,255,255,0.68)",
@@ -26,6 +26,13 @@ const typeStyle = {
   MAINTENANCE: { bg: "rgba(0,0,0,0.05)", color: "#555", label: "유지보수" },
 };
 
+const FILTERS = [
+  { key: "ALL", label: "전체" },
+  { key: "IN_PROGRESS", label: "진행중" },
+  { key: "PLANNING", label: "계획중" },
+  { key: "CLOSED", label: "종료" },
+];
+
 const emptyForm = {
   프로젝트ID: "",
   클라이언트ID: "",
@@ -47,7 +54,6 @@ function Field({ label, children }) {
           fontWeight: 500,
           color: "rgba(0,0,0,0.5)",
           marginBottom: 5,
-          letterSpacing: "0.01em",
         }}
       >
         {label}
@@ -76,6 +82,7 @@ export default function PMProjects() {
   const [clients, setClients] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [filter, setFilter] = useState("ALL");
   const navigate = useNavigate();
 
   const refresh = () => getProjects().then((res) => setProjects(res.data));
@@ -92,6 +99,9 @@ export default function PMProjects() {
     refresh();
   };
 
+  const filtered =
+    filter === "ALL" ? projects : projects.filter((p) => p.상태 === filter);
+
   return (
     <>
       {/* 헤더 */}
@@ -100,7 +110,7 @@ export default function PMProjects() {
           display: "flex",
           alignItems: "flex-end",
           justifyContent: "space-between",
-          marginBottom: 20,
+          marginBottom: 16,
         }}
       >
         <div>
@@ -145,6 +155,40 @@ export default function PMProjects() {
         </button>
       </div>
 
+      {/* 필터 탭 */}
+      <div
+        style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}
+      >
+        {FILTERS.map((f) => {
+          const cnt =
+            f.key === "ALL"
+              ? projects.length
+              : projects.filter((p) => p.상태 === f.key).length;
+          const isActive = filter === f.key;
+          return (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              type="button"
+              style={{
+                minHeight: 32,
+                border: isActive ? "none" : "0.5px solid rgba(0,0,0,0.12)",
+                borderRadius: 999,
+                padding: "0 14px",
+                fontSize: 12,
+                fontWeight: isActive ? 600 : 400,
+                cursor: "pointer",
+                transition: "all 0.15s",
+                background: isActive ? "rgba(20,20,30,0.85)" : "#fff",
+                color: isActive ? "#fff" : "rgba(0,0,0,0.5)",
+              }}
+            >
+              {f.label} <span style={{ opacity: 0.7 }}>{cnt}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* 카드 그리드 */}
       <div
         style={{
@@ -153,7 +197,7 @@ export default function PMProjects() {
           gap: 12,
         }}
       >
-        {projects.map((p) => {
+        {filtered.map((p) => {
           const st = statusStyle[p.상태] || statusStyle.PLANNING;
           const tp = typeStyle[p.프로젝트유형] || typeStyle.NEW;
           return (
@@ -302,7 +346,7 @@ export default function PMProjects() {
             </div>
           );
         })}
-        {projects.length === 0 && (
+        {filtered.length === 0 && (
           <div
             style={{
               ...glass,
@@ -315,12 +359,12 @@ export default function PMProjects() {
               fontWeight: 300,
             }}
           >
-            등록된 프로젝트가 없습니다.
+            해당 상태의 프로젝트가 없습니다.
           </div>
         )}
       </div>
 
-      {/* 모달 */}
+      {/* 등록 모달 */}
       {showModal && (
         <div
           style={{
@@ -366,7 +410,7 @@ export default function PMProjects() {
               <Field label="프로젝트ID">
                 <input
                   style={inputStyle}
-                  placeholder="PRJ-2025-001"
+                  placeholder="PRJ-2025-011"
                   value={form.프로젝트ID}
                   onChange={(e) =>
                     setForm({ ...form, 프로젝트ID: e.target.value })

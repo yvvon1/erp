@@ -1,20 +1,24 @@
-import React, { useLayoutEffect, useRef, useState, useEffect } from "react";
+import React, { useLayoutEffect, useRef, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { clearStoredUser, getStoredUser } from "../../utils/session";
 import PMDashboard from "./Dashboard";
 import PMProjects from "./Projects";
 import PMClients from "./Clients";
 import PMEmployees from "./Employees";
+import Pipeline from "./Pipeline";
 
 const TABS = [
   { label: "대시보드", path: "/pm/dashboard" },
+  { label: "수주 파이프라인", path: "/pm/pipeline" },
   { label: "프로젝트 목록", path: "/pm/projects" },
   { label: "클라이언트", path: "/pm/clients" },
   { label: "직원 관리", path: "/pm/employees" },
 ];
 
-const CONTENT = {
+// CONTENT는 컴포넌트 밖에 정의하여 리렌더 방지
+const STATIC_CONTENT = {
   "/pm/dashboard": <PMDashboard />,
+  "/pm/pipeline": <Pipeline />,
   "/pm/projects": <PMProjects />,
   "/pm/clients": <PMClients />,
   "/pm/employees": <PMEmployees />,
@@ -64,12 +68,10 @@ export default function PMShell() {
     }
   }, [activeTab]);
 
-  // 바깥 클릭 시 프로필 닫기
-  useEffect(() => {
+  React.useEffect(() => {
     const handleClick = (e) => {
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
+      if (profileRef.current && !profileRef.current.contains(e.target))
         setShowProfile(false);
-      }
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
@@ -183,11 +185,11 @@ export default function PMShell() {
                   justifyContent: "center",
                   border: 0,
                   borderRadius: 999,
-                  padding: "0 18px",
+                  padding: "0 16px",
                   background: "transparent",
                   color: activeTab === tab.path ? "#fff" : "rgba(20,20,30,0.5)",
-                  fontSize: 14,
-                  fontWeight: activeTab === tab.path ? 550 : 450,
+                  fontSize: 13,
+                  fontWeight: activeTab === tab.path ? 550 : 400,
                   whiteSpace: "nowrap",
                   cursor: "pointer",
                   letterSpacing: "-0.01em",
@@ -208,8 +210,7 @@ export default function PMShell() {
               gap: 10,
             }}
           >
-            {/* 알림 */}
-            <button
+            {/*<button
               type="button"
               title="알림"
               style={{
@@ -218,13 +219,12 @@ export default function PMShell() {
                 background: "#fff",
                 color: "rgba(20,20,30,0.55)",
                 cursor: "pointer",
-                fontSize: 12,
+                fontSize: 18,
               }}
             >
-              알림
-            </button>
+              ♧
+            </button>*/}
 
-            {/* 프로필 */}
             <div ref={profileRef} style={{ position: "relative" }}>
               <div
                 onClick={() => setShowProfile(!showProfile)}
@@ -271,7 +271,6 @@ export default function PMShell() {
                 </div>
               </div>
 
-              {/* 프로필 드롭다운 */}
               {showProfile && (
                 <div
                   style={{
@@ -284,14 +283,12 @@ export default function PMShell() {
                     WebkitBackdropFilter: "blur(48px)",
                     border: "0.5px solid rgba(255,255,255,0.9)",
                     borderRadius: 20,
-                    boxShadow:
-                      "0 8px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,1)",
+                    boxShadow: "0 8px 40px rgba(0,0,0,0.12)",
                     zIndex: 100,
                     overflow: "hidden",
                     animation: "fadeSlideDown 0.2s cubic-bezier(0.22,1,0.36,1)",
                   }}
                 >
-                  {/* 상단 프로필 정보 */}
                   <div
                     style={{
                       padding: "24px 22px 18px",
@@ -347,8 +344,6 @@ export default function PMShell() {
                         </div>
                       </div>
                     </div>
-
-                    {/* 계정 정보 */}
                     <div
                       style={{
                         display: "flex",
@@ -383,7 +378,6 @@ export default function PMShell() {
                               fontSize: 12,
                               fontWeight: 400,
                               color: "rgba(20,20,30,0.75)",
-                              letterSpacing: "-0.01em",
                             }}
                           >
                             {item.value}
@@ -392,8 +386,6 @@ export default function PMShell() {
                       ))}
                     </div>
                   </div>
-
-                  {/* 로그아웃 */}
                   <button
                     onClick={handleLogout}
                     type="button"
@@ -422,7 +414,6 @@ export default function PMShell() {
                         fontSize: 14,
                         fontWeight: 400,
                         color: "#b91c1c",
-                        letterSpacing: "-0.01em",
                       }}
                     >
                       로그아웃
@@ -434,7 +425,9 @@ export default function PMShell() {
           </div>
         </header>
 
-        <main className="main">{CONTENT[activeTab] || <PMDashboard />}</main>
+        <main className="main">
+          {STATIC_CONTENT[activeTab] || <PMDashboard />}
+        </main>
       </div>
 
       <style>{`
