@@ -194,7 +194,7 @@ export default function Login() {
                 value={직원ID}
                 onChange={(e) => set직원ID(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                placeholder="EMP-2025-001"
+                placeholder="EMP-001"
                 style={{
                   flex: 1,
                   background: "transparent",
